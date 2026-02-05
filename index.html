@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AMELI'S - Ofertas Relámpago</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <header>
+        <div class="logo">AMELI<span>'</span>S</div>
+        <div class="search-bar-container">
+            <input type="text" class="search-input" id="searchInput" placeholder="Buscar prendas..." onkeyup="searchProducts()">
+            <button class="search-btn"><i class="fas fa-search"></i></button>
+        </div>
+    </header>
+
+    <div class="flash-banner">
+        <div><i class="fas fa-bolt" style="color:#ffc107"></i> Ofertas Relámpago</div>
+        <div class="timer-box" id="countdown">00:00:00</div>
+    </div>
+
+    <div class="main-layout">
+        <div class="content-area">
+            <div class="categories-scroll" id="dynamicCategories">
+                <div class="cat-pill active">Cargando...</div>
+            </div>
+
+            <div class="products-grid" id="productsGrid">
+                <div style="text-align:center; padding:40px; color:#999; grid-column:1/-1;">Cargando catálogo...</div>
+            </div>
+        </div>
+
+        <aside class="cart-sidebar">
+            <div class="cart-title">Resumen de Pedido</div>
+            <div id="desktop-discount-bar" class="discount-alert" style="display:none;"></div>
+            <div id="desktop-cart-items" class="cart-items"><p style="color:#999; text-align:center; padding:20px;">Tu carrito está vacío</p></div>
+            <div id="desktop-cart-summary"></div>
+            <a href="#" class="btn-checkout" onclick="checkout()">Finalizar Compra</a>
+        </aside>
+    </div>
+
+    <div id="productDetailModal" class="detail-modal">
+        <div class="detail-header">
+            <button class="back-btn" onclick="closeDetail()"><i class="fas fa-arrow-left"></i></button>
+            <div style="font-weight:bold; color:#333">Detalles</div>
+            <button class="back-btn" onclick="openModal()"><i class="fas fa-shopping-cart"></i></button>
+        </div>
+        <div class="detail-content">
+            <img id="detailImg" class="detail-img" src="">
+            <div class="detail-info">
+                <div id="detailTitle" style="font-size:1.3rem;font-weight:700;margin-bottom:5px;text-transform:uppercase"></div>
+                <div style="display:flex;align-items:center;gap:5px;margin-bottom:10px;color:#666;font-size:0.9rem">
+                    <span class="stars">★★★★★</span> <span id="detailSold"></span>
+                </div>
+                <div id="detailPrice" style="font-size:2rem;font-weight:900;color:var(--price-red);margin-bottom:15px"></div>
+                
+                <div id="detailStock" class="stock-box"></div>
+                
+                <div class="desc-text">
+                    <b>Descripción:</b><br>
+                    <span id="detailDesc"></span>
+                </div>
+            </div>
+        </div>
+        <div class="detail-footer">
+            <button id="detailBtn" class="btn-big-add" onclick="addToCartFromDetail()">AÑADIR AL CARRITO</button>
+        </div>
+    </div>
+
+    <div class="mobile-fab" onclick="openModal()">
+        <i class="fas fa-shopping-cart"></i>
+        <span class="mobile-badge" id="mobile-count">0</span>
+    </div>
+
+    <div class="modal" id="cart-modal" onclick="if(event.target === this) closeModal()">
+        <div class="modal-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h3 style="color:var(--dark-blue)">Tu Carrito</h3>
+                <button onclick="closeModal()" style="border:none; background:none; font-size:1.5rem;">&times;</button>
+            </div>
+            <div id="mobile-discount-bar" class="discount-alert" style="display:none;"></div>
+            <div id="mobile-cart-items" style="max-height:300px; overflow-y:auto; margin-bottom:15px;"></div>
+            <div id="mobile-cart-summary"></div>
+            <a href="#" class="btn-checkout" onclick="checkout()">Pedir por WhatsApp</a>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
