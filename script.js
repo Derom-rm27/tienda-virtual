@@ -4,19 +4,201 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// Global Variables for Store Data
 let PROMO_META = 99999;
 let PROMO_BONO = 0;
 let allProducts = [], cart = [];
 let currentDetailProd = null;
 
+// DOM Elements - Common
+const loginBtn = document.getElementById('loginBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+const userEmailDisplay = document.getElementById('userEmailDisplay');
+const authModal = document.getElementById('authModal');
+const authModalForm = document.getElementById('authModalForm');
+const authEmailInput = document.getElementById('authEmail');
+const authPasswordInput = document.getElementById('authPassword');
+const authSubmitBtn = document.getElementById('authSubmitBtn');
+const authModalMessage = document.getElementById('authModalMessage');
+const toggleAuthModeBtn = document.getElementById('toggleAuthMode');
+
+// DOM Elements - Store Specific
+const storeContent = document.getElementById('storeContent');
+const storeFlashBanner = document.getElementById('storeFlashBanner');
+const storeSearchBar = document.getElementById('storeSearchBar');
+const countdownElement = document.getElementById('countdown');
+const dynamicCategories = document.getElementById('dynamicCategories');
+const productsGrid = document.getElementById('productsGrid');
+const productDetailModal = document.getElementById('productDetailModal');
+const detailImg = document.getElementById('detailImg');
+const detailTitle = document.getElementById('detailTitle');
+const detailPrice = document.getElementById('detailPrice');
+const detailDesc = document.getElementById('detailDesc');
+const detailSold = document.getElementById('detailSold');
+const detailStock = document.getElementById('detailStock');
+const detailBtn = document.getElementById('detailBtn');
+const searchInput = document.getElementById('searchInput');
+
+// DOM Elements - Admin Specific
+const adminContent = document.getElementById('adminContent');
+const adminWelcomeMessage = document.getElementById('adminWelcomeMessage');
+const productForm = document.getElementById('productForm');
+const productName = document.getElementById('productName');
+const productDescription = document.getElementById('productDescription');
+const productPrice = document.getElementById('productPrice');
+const productStock = document.getElementById('productStock');
+const productDiscount = document.getElementById('productDiscount');
+const productCategory = document.getElementById('productCategory');
+const productImage = document.getElementById('productImage');
+const productMessage = document.getElementById('productMessage');
+const currentProductsDiv = document.getElementById('currentProducts');
+
+let isSignUpMode = false; // Flag for authentication modal
+
+// --- Initial Setup and Event Listeners ---
+document.addEventListener('DOMContentLoaded', () => {
+    // Initial check for authentication status
+    supabase.auth.getSession().then(({ data: { session } }) => {
+        handleAuthStateChange(session);
+    });
+});
+
+// Listen for auth state changes
+supabase.auth.onAuthStateChange((event, session) => {
+    handleAuthStateChange(session);
+});
+
+// Authentication Modal Events
+authModalForm.addEventListener('submit', handleAuthSubmit);
+toggleAuthModeBtn.addEventListener('click', toggleAuthMode);
+logoutBtn.addEventListener('click', logoutUser);
+
+// Admin Product Form Event
+productForm.addEventListener('submit', handleProductFormSubmit);
+
+// Global countdown for flash banner
 setInterval(() => {
     const d = new Date();
-    document.getElementById('countdown').innerHTML = `Termina en: <span>${23-d.getHours()}</span>:<span>${59-d.getMinutes()}</span>:<span>${59-d.getSeconds()}</span>`;
+    if (countdownElement) {
+        countdownElement.innerHTML = `Termina en: <span>${23 - d.getHours()}</span>:<span>${59 - d.getMinutes()}</span>:<span>${59 - d.getSeconds()}</span>`;
+    }
 }, 1000);
 
+// --- Auth Handling ---
+async function handleAuthStateChange(session) {
+    if (session) {
+        loginBtn.style.display = 'none';
+        logoutBtn.style.display = 'block';
+        userEmailDisplay.textContent = session.user.email;
+        userEmailDisplay.style.display = 'inline';
+        closeAuthModal();
+        
+        const isAdmin = await checkIfAdmin(session.user.id);
+        if (isAdmin) {
+            showAdminPanel(session.user);
+        } else {
+            showStore();
+        }
+    } else {
+        showStore();
+        loginBtn.style.display = 'block';
+        logoutBtn.style.display = 'none';
+        userEmailDisplay.style.display = 'none';
+    }
+}
+
+async function handleAuthSubmit(e) {
+    e.preventDefault();
+    authModalMessage.textContent = '';
+    const email = authEmailInput.value;
+    const password = authPasswordInput.value;
+
+    if (isSignUpMode) {
+        const { error } = await supabase.auth.signUp({ email, password });
+        if (error) {
+            authModalMessage.textContent = `Error al registrar: ${error.message}`;
+            console.error('Sign Up Error:', error.message);
+        } else {
+            authModalMessage.textContent = '¡Registro exitoso! Revisa tu email para verificar la cuenta.';
+            authModalMessage.style.color = 'green';
+            isSignUpMode = false; // Switch to login mode after signup attempt
+            toggleAuthModeBtn.textContent = '¿No tienes cuenta? Regístrate';
+            authSubmitBtn.textContent = 'Iniciar Sesión';
+        }
+    } else {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+            authModalMessage.textContent = `Error al iniciar sesión: ${error.message}`;
+            console.error('Sign In Error:', error.message);
+        }
+    }
+}
+
+async function logoutUser() {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+        console.error('Error al cerrar sesión:', error.message);
+    }
+    // handleAuthStateChange will be triggered by onAuthStateChange listener
+}
+
+function openAuthModal() {
+    authModal.style.display = 'flex';
+    authModalMessage.textContent = '';
+    authModalForm.reset();
+    isSignUpMode = false;
+    authSubmitBtn.textContent = 'Iniciar Sesión';
+    toggleAuthModeBtn.textContent = '¿No tienes cuenta? Regístrate';
+}
+
+function closeAuthModal() {
+    authModal.style.display = 'none';
+}
+
+function toggleAuthMode() {
+    isSignUpMode = !isSignUpMode;
+    authSubmitBtn.textContent = isSignUpMode ? 'Registrarse' : 'Iniciar Sesión';
+    toggleAuthModeBtn.textContent = isSignUpMode ? '¿Ya tienes cuenta? Iniciar Sesión' : '¿No tienes cuenta? Regístrate';
+    authModalMessage.textContent = '';
+}
+
+async function checkIfAdmin(userId) {
+    if (!userId) return false;
+    const { count, error } = await supabase
+        .from('administradores')
+        .select('user_id', { count: 'exact' })
+        .eq('user_id', userId);
+
+    if (error) {
+        console.error('Error checking admin status:', error.message);
+        return false;
+    }
+    return count > 0;
+}
+
+function showStore() {
+    document.body.classList.remove('admin-page'); // Remove admin-specific body class
+    storeContent.style.display = 'grid'; // Store uses grid layout
+    adminContent.style.display = 'none';
+    storeFlashBanner.style.display = 'flex';
+    storeSearchBar.style.display = 'flex';
+    // Ensure store data is loaded
+    loadStoreData();
+}
+
+function showAdminPanel(user) {
+    document.body.classList.add('admin-page'); // Add admin-specific body class
+    storeContent.style.display = 'none';
+    adminContent.style.display = 'block'; // Admin uses block layout
+    storeFlashBanner.style.display = 'none';
+    storeSearchBar.style.display = 'none';
+    adminWelcomeMessage.textContent = `Bienvenido, ${user.email} (Administrador)`;
+    loadProductsForAdmin();
+}
+
+// --- Store Specific Logic (mostly unchanged, integrated) ---
 async function loadStoreData() {
     try {
-        // Fetch products from Supabase
         const { data: productsData, error: productsError } = await supabase
             .from('productos')
             .select('*');
@@ -26,14 +208,12 @@ async function loadStoreData() {
             return;
         }
 
-        // Fetch config from Supabase
         const { data: configData, error: configError } = await supabase
             .from('config')
             .select('dato, valor');
 
         if (configError) {
             console.warn('Error fetching config:', configError);
-            // Continue with default promo values if config fetching fails
         } else {
             configData.forEach(r => {
                 if (r.dato === 'meta') PROMO_META = parseFloat(r.valor);
@@ -48,8 +228,8 @@ async function loadStoreData() {
             descuento: parseInt(item.descuento) || 0,
             categoria: item.categoria ? item.categoria.toLowerCase() : 'varios',
             descripcion: item.descripcion || "Sin descripción disponible.",
-            rating: parseFloat(item.rating) || (Math.random() * (5.0 - 4.5) + 4.5).toFixed(1), // Use DB value, fallback to random
-            sold: parseInt(item.sold) || Math.floor(Math.random() * 200) + 50 // Use DB value, fallback to random
+            rating: parseFloat(item.rating) || (Math.random() * (5.0 - 4.5) + 4.5).toFixed(1),
+            sold: parseInt(item.sold) || Math.floor(Math.random() * 200) + 50
         }));
         
         generateCategories();
@@ -61,20 +241,19 @@ async function loadStoreData() {
 
 function generateCategories() {
     const cats = ['todos', ...new Set(allProducts.map(p => p.categoria))];
-    const div = document.getElementById('dynamicCategories');
-    div.innerHTML = ''; 
+    dynamicCategories.innerHTML = ''; 
     cats.forEach(c => {
         let btn = document.createElement('div');
         btn.className = 'cat-pill'; if(c==='todos') btn.classList.add('active');
         btn.innerText = c.charAt(0).toUpperCase() + c.slice(1);
         btn.onclick = () => filterProducts(c, btn);
-        div.appendChild(btn);
+        dynamicCategories.appendChild(btn);
     });
 }
 
 function renderProducts(list) {
-    const grid = document.getElementById('productsGrid'); grid.innerHTML = ''; 
-    if(list.length===0) { grid.innerHTML='<p style="padding:20px;grid-column:1/-1;text-align:center">No hay productos.</p>'; return; }
+    productsGrid.innerHTML = ''; 
+    if(list.length===0) { productsGrid.innerHTML='<p style="padding:20px;grid-column:1/-1;text-align:center">No hay productos.</p>'; return; }
 
     list.forEach(prod => {
         let final = prod.descuento > 0 ? prod.precio - (prod.precio * prod.descuento / 100) : prod.precio;
@@ -100,7 +279,7 @@ function renderProducts(list) {
                 </div>
                 ${btnHtml}
             </div>`;
-        grid.appendChild(div);
+        productsGrid.appendChild(div);
     });
 }
 
@@ -109,14 +288,14 @@ function openDetail(p) {
     currentDetailProd = p;
     let final = p.descuento > 0 ? p.precio - (p.precio * p.descuento / 100) : p.precio;
     
-    document.getElementById('detailImg').src = p.imagen || 'https://via.placeholder.com/300';
-    document.getElementById('detailTitle').innerText = p.nombre;
-    document.getElementById('detailPrice').innerText = `S/ ${final.toFixed(2)}`;
-    document.getElementById('detailDesc').innerText = p.descripcion;
-    document.getElementById('detailSold').innerText = `(${p.sold} vendidos)`;
+    detailImg.src = p.imagen || 'https://via.placeholder.com/300';
+    detailTitle.innerText = p.nombre;
+    detailPrice.innerText = `S/ ${final.toFixed(2)}`;
+    detailDesc.innerText = p.descripcion;
+    detailSold.innerText = `(${p.sold} vendidos)`;
     
-    let stockBox = document.getElementById('detailStock');
-    let btn = document.getElementById('detailBtn');
+    let stockBox = detailStock;
+    let btn = detailBtn;
     
     if(p.stock <= 0) {
         stockBox.innerText = "Producto Agotado"; stockBox.className = "stock-box out";
@@ -125,9 +304,9 @@ function openDetail(p) {
         stockBox.innerText = `Stock disponible: ${p.stock} unidades`; stockBox.className = "stock-box";
         btn.innerText = "AÑADIR AL CARRITO"; btn.disabled = false;
     }
-    document.getElementById('productDetailModal').style.display = 'block';
+    productDetailModal.style.display = 'block';
 }
-function closeDetail() { document.getElementById('productDetailModal').style.display = 'none'; }
+function closeDetail() { productDetailModal.style.display = 'none'; }
 function addToCartFromDetail() { if(currentDetailProd && currentDetailProd.stock > 0) { add(currentDetailProd.nombre); closeDetail(); } }
 
 // --- CARRITO ---
@@ -144,7 +323,7 @@ function add(name) {
     
     updateCartUI();
     const fab = document.querySelector('.mobile-fab'); 
-    if(fab) { fab.style.transform='scale(1.2)'; setTimeout(()=>fab.style.transform='scale(1)', 200); }
+    if(fab) { fab.transform='scale(1.2)'; setTimeout(()=>fab.style.transform='scale(1)', 200); }
 }
 
 function changeQty(index, change) {
@@ -211,7 +390,7 @@ function filterProducts(cat, btn) {
     renderProducts(cat === 'todos' ? allProducts : allProducts.filter(p => p.categoria === cat));
 }
 function searchProducts() { 
-    let val = document.getElementById('searchInput').value.toLowerCase(); 
+    let val = searchInput.value.toLowerCase(); 
     renderProducts(allProducts.filter(p => p.nombre.toLowerCase().includes(val))); 
 }
 function openModal() { document.getElementById('cart-modal').style.display = 'flex'; }
@@ -230,4 +409,129 @@ function checkout() {
     window.open(`https://wa.me/51904850808?text=${msg}`, '_blank');
 }
 
-loadStoreData();
+// --- Admin Specific Logic (integrated from admin.js) ---
+async function handleProductFormSubmit(e) {
+    e.preventDefault();
+    productMessage.textContent = 'Subiendo producto...';
+    productMessage.style.color = 'blue';
+
+    const file = productImage.files[0];
+    let imageUrl = '';
+
+    if (file) {
+        const filePath = `${Date.now()}_${file.name}`;
+        const { data, error } = await supabase.storage
+            .from('product-images')
+            .upload(filePath, file);
+
+        if (error) {
+            productMessage.textContent = `Error al subir imagen: ${error.message}`;
+            productMessage.style.color = 'red';
+            console.error('Storage Upload Error:', error.message);
+            return;
+        }
+        imageUrl = `${SUPABASE_URL}/storage/v1/object/public/product-images/${filePath}`;
+    }
+
+    const { data, error: insertError } = await supabase
+        .from('productos')
+        .insert([
+            {
+                nombre: productName.value,
+                descripcion: productDescription.value,
+                precio: parseFloat(productPrice.value),
+                stock: parseInt(productStock.value),
+                descuento: parseInt(productDiscount.value),
+                categoria: productCategory.value.toLowerCase(),
+                imagen: imageUrl,
+                rating: (Math.random() * (5.0 - 4.5) + 4.5).toFixed(1),
+                sold: Math.floor(Math.random() * 200) + 50
+            },
+        ]);
+
+    if (insertError) {
+        productMessage.textContent = `Error al añadir producto: ${insertError.message}`;
+        productMessage.style.color = 'red';
+        console.error('Insert Product Error:', insertError.message);
+    } else {
+        productMessage.textContent = '¡Producto añadido con éxito!';
+        productMessage.style.color = 'green';
+        productForm.reset(); // Clear form
+        loadProductsForAdmin(); // Reload product list
+    }
+}
+
+async function loadProductsForAdmin() {
+    currentProductsDiv.innerHTML = 'Cargando productos...';
+    const { data, error } = await supabase
+        .from('productos')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+    if (error) {
+        currentProductsDiv.innerHTML = `Error al cargar productos: ${error.message}`;
+        console.error('Load Admin Products Error:', error.message);
+        return;
+    }
+
+    if (data.length === 0) {
+        currentProductsDiv.innerHTML = '<p>No hay productos registrados.</p>';
+        return;
+    }
+
+    let productsHtml = '<ul class="admin-product-list">';
+    data.forEach(prod => {
+        productsHtml += `
+            <li>
+                <img src="${prod.imagen || 'https://via.placeholder.com/50'}" alt="${prod.nombre}" width="50" height="50">
+                <span>${prod.nombre} - S/${prod.precio.toFixed(2)} (${prod.stock} en stock)</span>
+                <button onclick="deleteProduct('${prod.id}')" class="delete-btn"><i class="fas fa-trash"></i></button>
+            </li>`;
+    });
+    productsHtml += '</ul>';
+    currentProductsDiv.innerHTML = productsHtml;
+}
+
+async function deleteProduct(productId) {
+    if (!confirm('¿Estás seguro de que quieres eliminar este producto?')) return;
+
+    const { data: productToDelete, error: fetchError } = await supabase
+        .from('productos')
+        .select('imagen')
+        .eq('id', productId)
+        .single();
+
+    if (fetchError) {
+        console.error('Error fetching product for image deletion:', fetchError.message);
+        productMessage.textContent = `Error: ${fetchError.message}`;
+        productMessage.style.color = 'red';
+        return;
+    }
+
+    if (productToDelete && productToDelete.imagen) {
+        const imageUrl = productToDelete.imagen;
+        const fileName = imageUrl.substring(imageUrl.lastIndexOf('/') + 1);
+        const { error: deleteImageError } = await supabase.storage
+            .from('product-images')
+            .remove([fileName]);
+
+        if (deleteImageError) {
+            console.error('Error deleting image from storage:', deleteImageError.message);
+        }
+    }
+
+    const { error } = await supabase
+        .from('productos')
+        .delete()
+        .eq('id', productId);
+
+    if (error) {
+        console.error('Error al eliminar producto:', error.message);
+        productMessage.textContent = `Error al eliminar producto: ${error.message}`;
+        productMessage.style.color = 'red';
+    } else {
+        productMessage.textContent = 'Producto eliminado con éxito.';
+        productMessage.style.color = 'green';
+        loadProductsForAdmin();
+    }
+}

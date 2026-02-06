@@ -290,6 +290,20 @@ body.admin-page .main-layout {
 .admin-container #authNav #logoutBtn:hover {
     background-color: #a72216;
 }
+.header-btn {
+    background: var(--primary-blue);
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-left: 10px;
+}
+.header-btn:hover {
+    background-color: var(--dark-blue);
+}
 
 /* Product List */
 .admin-product-list {
@@ -351,4 +365,23 @@ body.admin-page .main-layout {
     .admin-product-list li span {
         width: calc(100% - 70px); /* Adjust width to make space for image and delete button */
     }
+}
+.user-info {
+    margin-left: 10px;
+    font-weight: 500;
+    color: var(--dark-blue);
+}
+.link-btn {
+    background: none;
+    border: none;
+    color: var(--primary-blue);
+    cursor: pointer;
+    text-decoration: underline;
+    font-size: 0.9rem;
+    padding: 0;
+    display: block; /* To take full width for easier tapping on mobile */
+    text-align: center;
+}
+.link-btn:hover {
+    color: var(--dark-blue);
 }
