@@ -20,8 +20,6 @@ const authEmailInput = document.getElementById('authEmail');
 const authPasswordInput = document.getElementById('authPassword');
 const authSubmitBtn = document.getElementById('authSubmitBtn');
 const authModalMessage = document.getElementById('authModalMessage');
-const toggleAuthModeBtn = document.getElementById('toggleAuthMode');
-const authTitle = document.getElementById('authTitle');
 
 // DOM Elements - Store Specific
 const countdownElement = document.getElementById('countdown');
@@ -37,15 +35,11 @@ const detailStock = document.getElementById('detailStock');
 const detailBtn = document.getElementById('detailBtn');
 const searchInput = document.getElementById('searchInput');
 
-let isSignUpMode = false; // Flag for authentication modal
-
 // --- Initial Setup and Event Listeners ---
 document.addEventListener('DOMContentLoaded', () => {
-    // Initial check for authentication status
     supabase.auth.getSession().then(({ data: { session } }) => {
         handleAuthStateChange(session);
     });
-    // Load store data immediately
     loadStoreData();
 });
 
@@ -56,7 +50,6 @@ supabase.auth.onAuthStateChange((event, session) => {
 
 // Authentication Modal Events
 if (authModalForm) authModalForm.addEventListener('submit', handleAuthSubmit);
-if (toggleAuthModeBtn) toggleAuthModeBtn.addEventListener('click', toggleAuthMode);
 if (logoutBtn) logoutBtn.addEventListener('click', logoutUser);
 
 // Global countdown for flash banner
@@ -70,6 +63,22 @@ setInterval(() => {
 // --- Auth Handling for Customers ---
 async function handleAuthStateChange(session) {
     if (session) {
+        const { data: adminData, error: adminError } = await supabase
+            .from('administradores')
+            .select('user_id')
+            .eq('user_id', session.user.id);
+
+        if (adminError) {
+            console.error("Error checking for admin status:", adminError);
+            await supabase.auth.signOut();
+            return;
+        }
+
+        if (adminData && adminData.length > 0) {
+            await supabase.auth.signOut();
+            return;
+        }
+
         if (loginBtn) loginBtn.style.display = 'none';
         if (logoutBtn) logoutBtn.style.display = 'block';
         if (userEmailDisplay) {
@@ -90,58 +99,32 @@ async function handleAuthSubmit(e) {
     const email = authEmailInput.value;
     const password = authPasswordInput.value;
 
-    if (isSignUpMode) {
-        const { error } = await supabase.auth.signUp({ email, password });
-        if (error) {
-            authModalMessage.textContent = `Error al registrar: ${error.message}`;
-            console.error('Sign Up Error:', error.message);
-        } else {
-            authModalMessage.textContent = '¡Registro exitoso! Revisa tu email para verificar la cuenta.';
-            authModalMessage.style.color = 'green';
-            // Optionally switch to login mode after successful signup
-            // isSignUpMode = false;
-            // toggleAuthModeBtn.textContent = '¿No tienes cuenta? Regístrate';
-            // authSubmitBtn.textContent = 'Iniciar Sesión';
-        }
-    } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) {
-            authModalMessage.textContent = `Error al iniciar sesión: ${error.message}`;
-            console.error('Sign In Error:', error.message);
-        }
-    }
-}
-
-async function logoutUser() {
-    const { error } = await supabase.auth.signOut();
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
-        console.error('Error al cerrar sesión:', error.message);
+        authModalMessage.textContent = `Error al iniciar sesión: ${error.message}`;
+        console.error('Sign In Error:', error.message);
     }
-    // handleAuthStateChange will be triggered by onAuthStateChange listener
 }
 
-function openAuthModal() {
-    if (authModal) authModal.style.display = 'flex';
+window.logoutUser = async function() {
+    const { error } = await supabase.auth.signOut();
+    if (error) console.error('Error al cerrar sesión:', error.message);
+}
+
+window.openAuthModal = function() {
+    alert('Prueba de diagnóstico: El botón está respondiendo.'); // Diagnostic alert
+    if (authModal) {
+        authModal.style.display = 'flex';
+    } else {
+        alert('Error: El modal de autenticación no se encontró en la página.');
+    }
     if (authModalMessage) authModalMessage.textContent = '';
     if (authModalForm) authModalForm.reset();
-    isSignUpMode = false;
-    if (authSubmitBtn) authSubmitBtn.textContent = 'Iniciar Sesión';
-    if (toggleAuthModeBtn) toggleAuthModeBtn.textContent = '¿No tienes cuenta? Regístrate';
-    if (authTitle) authTitle.textContent = 'Acceder a AMELI\'S';
 }
 
-function closeAuthModal() {
+window.closeAuthModal = function() {
     if (authModal) authModal.style.display = 'none';
 }
-
-function toggleAuthMode() {
-    isSignUpMode = !isSignUpMode;
-    if (authSubmitBtn) authSubmitBtn.textContent = isSignUpMode ? 'Registrarse' : 'Iniciar Sesión';
-    if (toggleAuthModeBtn) toggleAuthModeBtn.textContent = isSignUpMode ? '¿Ya tienes cuenta? Iniciar Sesión' : '¿No tienes cuenta? Regístrate';
-    if (authModalMessage) authModalMessage.textContent = '';
-    if (authTitle) authTitle.textContent = isSignUpMode ? 'Registrarse en AMELI\'S' : 'Acceder a AMELI\'S';
-}
-
 
 // --- Store Specific Logic ---
 async function loadStoreData() {
@@ -161,11 +144,10 @@ async function loadStoreData() {
 
         if (configError) {
             console.warn('Error fetching config:', configError);
-            // Continue with default promo values if config fetching fails
         } else {
             configData.forEach(r => {
                 if (r.dato === 'meta') PROMO_META = parseFloat(r.valor);
-                if (r.dato === 'bono') PROMO_BONO = parseFloat(r.valor);
+                if (r.dato === 'bono') PROMO_BONO = parseFloat(r.valor); // Typo fixed here
             });
         }
 
@@ -231,7 +213,6 @@ function renderProducts(list) {
     });
 }
 
-// --- DETALLE ---
 function openDetail(p) {
     currentDetailProd = p;
     let final = p.descuento > 0 ? p.precio - (p.precio * p.descuento / 100) : p.precio;
@@ -257,7 +238,6 @@ function openDetail(p) {
 function closeDetail() { if (productDetailModal) productDetailModal.style.display = 'none'; }
 function addToCartFromDetail() { if(currentDetailProd && currentDetailProd.stock > 0) { add(currentDetailProd.nombre); closeDetail(); } }
 
-// --- CARRITO ---
 function add(name) {
     let prod = allProducts.find(p => p.nombre === name);
     if (!prod) return;

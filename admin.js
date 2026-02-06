@@ -14,6 +14,13 @@ const adminContent = document.getElementById('adminContent');
 const adminWelcomeMessage = document.getElementById('adminWelcomeMessage');
 const logoutBtn = document.getElementById('logoutBtn');
 
+// User Creation DOM Elements
+const createUserForm = document.getElementById('createUserForm');
+const newUserEmailInput = document.getElementById('newUserEmail');
+const newUserPasswordInput = document.getElementById('newUserPassword');
+const isNewUserAdminCheckbox = document.getElementById('isNewUserAdmin');
+const createUserMessage = document.getElementById('createUserMessage');
+
 // Product Management DOM Elements
 const productForm = document.getElementById('productForm');
 const productName = document.getElementById('productName');
@@ -46,7 +53,7 @@ async function handleAdminLogin(e) {
             showAdminPanel(data.user);
         } else {
             adminLoginMessage.textContent = 'Acceso denegado. No eres un administrador.';
-            await supabase.auth.signOut(); // Log out non-admin user immediately
+            await supabase.auth.signOut();
         }
     }
 }
@@ -57,21 +64,18 @@ async function checkIfAdmin(userId) {
         .from('administradores')
         .select('user_id')
         .eq('user_id', userId)
-        .single(); // Use .single() as we expect at most one row
+        .single();
 
-    if (error && error.code !== 'PGRST116') { // PGRST116 means no rows found, which is not an error here
+    if (error && error.code !== 'PGRST116') {
         console.error('Error checking admin status:', error.message);
         return false;
     }
-    return !!data; // Return true if data is not null
+    return !!data;
 }
 
 async function logoutUser() {
     const { error } = await supabase.auth.signOut();
-    if (error) {
-        console.error('Error al cerrar sesión:', error.message);
-    }
-    // The onAuthStateChange listener will handle the UI changes
+    if (error) console.error('Error al cerrar sesión:', error.message);
 }
 
 function showAdminLogin() {
@@ -88,7 +92,6 @@ function showAdminPanel(user) {
     loadProductsForAdmin();
 }
 
-// Listen for auth state changes to show/hide content
 supabase.auth.onAuthStateChange(async (event, session) => {
     if (event === 'SIGNED_OUT' || !session) {
         showAdminLogin();
@@ -100,11 +103,59 @@ supabase.auth.onAuthStateChange(async (event, session) => {
             showAdminPanel(session.user);
         } else {
             showAdminLogin();
-            // Optional: If a non-admin is somehow still signed in, log them out.
             await supabase.auth.signOut();
         }
     }
 });
+
+// --- User Creation Function ---
+async function handleCreateUser(e) {
+    e.preventDefault();
+    createUserMessage.textContent = 'Creando usuario...';
+    createUserMessage.style.color = 'blue';
+
+    const email = newUserEmailInput.value;
+    const password = newUserPasswordInput.value;
+    const makeAdmin = isNewUserAdminCheckbox.checked;
+
+    // This uses a special admin-only function. For this to work, you'd typically need a
+    // secure server-side environment. However, we can simulate it for now.
+    // IMPORTANT: The user will be created, but making them an admin from the client-side
+    // is only possible because the 'administradores' table has open write permissions.
+    // This is NOT secure for a production environment.
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: email,
+        password: password,
+    });
+
+    if (authError) {
+        createUserMessage.textContent = `Error al crear usuario: ${authError.message}`;
+        createUserMessage.style.color = 'red';
+        return;
+    }
+
+    if (authData.user) {
+        let message = '¡Usuario cliente creado con éxito!';
+        
+        // If the "make admin" checkbox is checked, add them to the 'administradores' table
+        if (makeAdmin) {
+            const { error: adminError } = await supabase
+                .from('administradores')
+                .insert([{ user_id: authData.user.id }]);
+            
+            if (adminError) {
+                message = `Usuario creado, pero no se pudo asignar como admin: ${adminError.message}`;
+                createUserMessage.style.color = 'orange';
+            } else {
+                message = '¡Usuario administrador creado con éxito!';
+            }
+        }
+        
+        createUserMessage.textContent = message;
+        createUserMessage.style.color = 'green';
+        createUserForm.reset();
+    }
+}
 
 // --- Product Management Functions ---
 async function handleProductFormSubmit(e) {
@@ -124,20 +175,17 @@ async function handleProductFormSubmit(e) {
         if (error) {
             productMessage.textContent = `Error al subir imagen: ${error.message}`;
             productMessage.style.color = 'red';
-            console.error('Storage Upload Error:', error.message);
             return;
         }
         
-        // Construct public URL
         const { data: publicUrlData } = supabase.storage
             .from('product-images')
             .getPublicUrl(filePath);
         
         imageUrl = publicUrlData.publicUrl;
-
     }
 
-    const { data, error: insertError } = await supabase
+    const { error: insertError } = await supabase
         .from('productos')
         .insert([{
             nombre: productName.value,
@@ -190,10 +238,9 @@ async function loadProductsForAdmin() {
     `;
 }
 
-async function deleteProduct(productId, imageUrl) {
+window.deleteProduct = async function(productId, imageUrl) {
     if (!confirm('¿Estás seguro de que quieres eliminar este producto?')) return;
 
-    // First, delete the database record
     const { error: deleteDbError } = await supabase
         .from('productos')
         .delete()
@@ -205,7 +252,6 @@ async function deleteProduct(productId, imageUrl) {
         return;
     }
 
-    // If database deletion is successful, delete the image from storage
     if (imageUrl) {
         const fileName = imageUrl.split('/').pop();
         if (fileName) {
@@ -214,9 +260,8 @@ async function deleteProduct(productId, imageUrl) {
                 .remove([fileName]);
 
             if (deleteImageError) {
-                // Log the error but don't block the user feedback, as the DB entry is gone
                 console.error('Error deleting image from storage:', deleteImageError.message);
-                productMessage.textContent = 'Producto eliminado de la base de datos, pero hubo un error al borrar la imagen del almacenamiento.';
+                productMessage.textContent = 'Producto eliminado, pero hubo un error al borrar la imagen.';
                 productMessage.style.color = 'orange';
             }
         }
@@ -234,3 +279,4 @@ async function deleteProduct(productId, imageUrl) {
 adminLoginForm.addEventListener('submit', handleAdminLogin);
 logoutBtn.addEventListener('click', logoutUser);
 productForm.addEventListener('submit', handleProductFormSubmit);
+createUserForm.addEventListener('submit', handleCreateUser);

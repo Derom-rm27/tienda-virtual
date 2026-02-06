@@ -107,12 +107,18 @@
                 <input type="password" id="authPassword" placeholder="Contraseña" required>
                 <button type="submit" id="authSubmitBtn">Iniciar Sesión</button>
                 <p id="authModalMessage" style="color:red; margin-top:10px;"></p>
-                <button type="button" id="toggleAuthMode" class="link-btn" style="margin-top:10px;">¿No tienes cuenta? Regístrate</button>
+                <button type="button" class="link-btn" style="margin-top:10px;" onclick="window.location.href='registro.html'">¿No tienes cuenta? Regístrate</button>
             </form>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="script.js"></script>
+
+    <footer style="text-align: center; padding: 20px; margin-top: 30px; color: #888; font-size: 0.9rem; border-top: 1px solid #eee;">
+        <p>&copy; 2024 AMELI'S. Todos los derechos reservados.</p>
+        <a href="admin.html" style="color: #555; text-decoration: none; font-weight: 500;">Acceso Administrador</a>
+    </footer>
+
 </body>
 </html>

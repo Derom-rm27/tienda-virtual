@@ -33,7 +33,20 @@
         <div id="adminContent" class="admin-container" style="display:none;">
             <h2 id="adminWelcomeMessage"></h2>
 
-            <h3>Subir Nuevo Producto</h3>
+            <!-- Formulario para Crear Nuevos Usuarios -->
+            <h3 style="margin-top: 20px;">Crear Nuevo Usuario</h3>
+            <form id="createUserForm">
+                <input type="email" id="newUserEmail" placeholder="Correo del Nuevo Usuario" required>
+                <input type="password" id="newUserPassword" placeholder="Contraseña para el Nuevo Usuario" required>
+                <div style="display: flex; align-items: center; gap: 10px; margin: 5px 0;">
+                    <input type="checkbox" id="isNewUserAdmin" style="width: auto;">
+                    <label for="isNewUserAdmin">Asignar como Administrador</label>
+                </div>
+                <button type="submit">Crear Usuario</button>
+                <p id="createUserMessage" style="margin-top:10px;"></p>
+            </form>
+
+            <h3 style="margin-top: 30px;">Subir Nuevo Producto</h3>
             <form id="productForm">
                 <input type="text" id="productName" placeholder="Nombre del Producto" required>
                 <textarea id="productDescription" placeholder="Descripción del Producto"></textarea>
@@ -51,7 +64,7 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.com/npm/@supabase/supabase-js@2"></script>
     <script src="admin.js"></script>
 </body>
 </html>

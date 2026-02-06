@@ -1,26 +1,26 @@
 :root {
             /* PALETA "AMELI'S BLUE TEMU" */
-            --primary-blue: #004aad; 
+            --primary-blue: #004aad;
             --dark-blue: #003366;
-            --price-red: #da291c;    
+            --price-red: #da291c;
             --bg-page: #f6f6f6;
             --white: #ffffff;
             --gold-star: #ffc107;
             --border-color: #e6e6e6;
             --green-success: #059669;
-            
+
             /* ALTURAS FIJAS */
             --header-h: 70px;
             --banner-h: 40px;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; -webkit-tap-highlight-color: transparent; }
-        
-        body { 
-            background-color: var(--bg-page); 
-            color: #333; 
-            padding-top: calc(var(--header-h) + var(--banner-h) + 15px); 
-            padding-bottom: 80px; 
+
+        body {
+            background-color: var(--bg-page);
+            color: #333;
+            padding-top: calc(var(--header-h) + var(--banner-h) + 15px);
+            padding-bottom: 80px;
             overscroll-behavior-y: none; /* Evita rebote */
         }
 
@@ -49,7 +49,7 @@
         /* === BANNER FIJO === */
         .flash-banner {
             background: linear-gradient(90deg, var(--dark-blue) 0%, var(--primary-blue) 100%);
-            color: white; 
+            color: white;
             height: var(--banner-h);
             width: 100%;
             position: fixed; top: var(--header-h); left: 0; z-index: 1999;
@@ -91,7 +91,7 @@
 
         .img-wrapper { position: relative; width: 100%; padding-top: 100%; overflow: hidden; background: #eee; }
         .img-wrapper img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
-        
+
         .deal-tag {
             position: absolute; bottom: 0; left: 0; width: 100%;
             background: rgba(0, 74, 173, 0.9); color: white;
@@ -105,7 +105,7 @@
             display: flex; justify-content: center; align-items: center;
         }
         .agotado-text {
-            color: #555; border: 2px solid #555; padding: 5px 10px; 
+            color: #555; border: 2px solid #555; padding: 5px 10px;
             font-weight: 900; transform: rotate(-15deg); font-size: 1.2rem;
         }
 
@@ -118,7 +118,7 @@
         .price-row { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
         .current-price { color: var(--price-red); font-size: 1.1rem; font-weight: 900; }
         .original-price { color: #999; font-size: 0.8rem; text-decoration: line-through; }
-        
+
         .meta-row { display: flex; align-items: center; gap: 5px; margin-top: 5px; font-size: 0.7rem; color: #777; }
         .stars { color: var(--gold-star); letter-spacing: 1px; }
         .sold-count { background: #f0f0f0; padding: 2px 5px; border-radius: 4px; }
@@ -146,28 +146,28 @@
             padding: 0 15px; border-bottom: 1px solid #eee; z-index: 3001;
         }
         .back-btn { background: none; border: none; font-size: 1.5rem; color: #333; cursor: pointer; }
-        
+
         .detail-content { padding-top: 60px; padding-bottom: 100px; }
-        
+
         /* === CORRECCIÓN AQUÍ: Imagen completa y centrada === */
-        .detail-img { 
-            width: 100%; 
+        .detail-img {
+            width: 100%;
             height: 50vh; /* Altura máxima media pantalla */
             object-fit: contain; /* IMPORTANTE: Muestra la foto entera sin cortarla */
             background: #ffffff; /* Fondo blanco para que se vea limpio */
-        } 
-        
+        }
+
         .detail-info { padding: 20px; }
-        
+
         .stock-box {
-            background: #f0f9ff; color: #0369a1; padding: 8px 12px; border-radius: 6px; 
+            background: #f0f9ff; color: #0369a1; padding: 8px 12px; border-radius: 6px;
             font-weight: bold; margin-bottom: 10px; display: inline-block; font-size: 0.85rem;
         }
         .stock-box.out { background: #fee2e2; color: #991b1b; }
 
-        .desc-text { 
-            color: #555; line-height: 1.5; white-space: pre-wrap; font-size: 0.9rem; 
-            border-top: 1px solid #eee; padding-top: 15px; 
+        .desc-text {
+            color: #555; line-height: 1.5; white-space: pre-wrap; font-size: 0.9rem;
+            border-top: 1px solid #eee; padding-top: 15px;
         }
 
         .detail-footer {
@@ -175,7 +175,7 @@
             background: white; border-top: 1px solid #eee; z-index: 3001;
         }
         .btn-big-add {
-            width: 100%; background: var(--primary-blue); color: white; border: none; 
+            width: 100%; background: var(--primary-blue); color: white; border: none;
             padding: 15px; border-radius: 30px; font-weight: bold; font-size: 1rem; cursor: pointer;
         }
         .btn-big-add:disabled { background: #ccc; cursor: not-allowed; }
@@ -402,4 +402,21 @@ body.admin-page .main-layout {
         width: 95%;
         margin: 10% auto; /* Adjust margin for better mobile appearance */
     }
+}
+
+/* Añade esto en style.css para darle diseño al botón */
+.header-btn {
+    background: var(--primary-blue);
+    color: white;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: 0.3s;
+    white-space: nowrap;
+}
+.header-btn:hover {
+    background: var(--dark-blue);
 }

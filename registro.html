@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMELI'S - Registro de Usuario</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="admin-page"> <!-- Reutilizamos la clase para un layout centrado y limpio -->
+
+    <header>
+        <div class="logo" onclick="window.location.href='index.html'" style="cursor: pointer;">AMELI<span>'</span>S</div>
+    </header>
+
+    <div class="main-layout">
+        <div id="registerSection" class="admin-container">
+            <h3>Crea tu Cuenta en AMELI'S</h3>
+            <p style="margin-bottom: 20px; color: #555;">Únete para disfrutar de una experiencia de compra más rápida y personalizada.</p>
+            <form id="registerForm">
+                <input type="text" id="registerName" placeholder="Nombre Completo" required>
+                <input type="email" id="registerEmail" placeholder="Correo Electrónico" required>
+                <input type="password" id="registerPassword" placeholder="Contraseña (mín. 6 caracteres)" required>
+                <button type="submit">Crear Cuenta</button>
+                <p id="registerMessage" style="margin-top:10px;"></p>
+            </form>
+            <p style="text-align: center; margin-top: 20px;">
+                ¿Ya tienes una cuenta? <a href="#" onclick="window.history.back(); return false;">Inicia Sesión aquí</a>
+            </p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="registro.js"></script>
+</body>
+</html>
