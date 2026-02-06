@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMELI'S - Panel de Administración</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="admin-page">
+
+    <header>
+        <div class="logo">AMELI<span>'</span>S Admin</div>
+        <nav>
+            <button id="logoutBtn" class="header-btn" style="display:none;">Cerrar Sesión</button>
+        </nav>
+    </header>
+
+    <div class="main-layout">
+        <!-- Sección de Autenticación de Administrador (Visible por defecto) -->
+        <div id="adminLoginSection" class="admin-container" style="display:block;">
+            <h3>Acceso de Administrador</h3>
+            <form id="adminLoginForm">
+                <input type="email" id="adminEmail" placeholder="Correo Electrónico" required>
+                <input type="password" id="adminPassword" placeholder="Contraseña" required>
+                <button type="submit">Iniciar Sesión</button>
+                <p id="adminLoginMessage" style="color:red; margin-top:10px;"></p>
+            </form>
+        </div>
+
+        <!-- Contenido del Panel de Administración (Oculto por defecto) -->
+        <div id="adminContent" class="admin-container" style="display:none;">
+            <h2 id="adminWelcomeMessage"></h2>
+
+            <h3>Subir Nuevo Producto</h3>
+            <form id="productForm">
+                <input type="text" id="productName" placeholder="Nombre del Producto" required>
+                <textarea id="productDescription" placeholder="Descripción del Producto"></textarea>
+                <input type="number" id="productPrice" placeholder="Precio (S/)" step="0.01" required>
+                <input type="number" id="productStock" placeholder="Stock" required>
+                <input type="number" id="productDiscount" placeholder="Descuento (%)" value="0">
+                <input type="text" id="productCategory" placeholder="Categoría" required>
+                <input type="file" id="productImage" accept="image/*">
+                <button type="submit">Añadir Producto</button>
+                <p id="productMessage" style="color:green; margin-top:10px;"></p>
+            </form>
+
+            <h3 style="margin-top: 30px;">Tus Productos Actuales</h3>
+            <div id="currentProducts">Cargando productos...</div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="admin.js"></script>
+</body>
+</html>
