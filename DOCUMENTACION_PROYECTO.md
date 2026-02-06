@@ -69,3 +69,42 @@ Actualizar tu tienda es bastante sencillo, especialmente con Supabase:
 
 ---
 **¡Listo!** Con esto, tu tienda está integrada con Supabase y lista para ser desplegada.
+
+---
+
+### Panel de Administración (para subir productos desde el celular)
+
+Hemos creado una interfaz sencilla para que puedas gestionar tus productos (subir nuevos y eliminar existentes) desde cualquier dispositivo, incluido tu celular.
+
+**Acceso al Panel:**
+
+*   **URL:** Accede a `https://Derom-rm27.github.io/tienda-virtual/admin.html` (o la URL de tu sitio de GitHub Pages seguido de `/admin.html`).
+*   **Autenticación:**
+    *   Usa el correo y la contraseña que registraste en Supabase.
+    *   Si es tu primera vez, Supabase te pedirá verificar tu correo electrónico.
+
+**Funcionalidades:**
+
+1.  **Inicio de Sesión / Registro:** Al acceder al `admin.html`, lo primero que verás es un formulario para iniciar sesión o registrarte. Si ya tienes una cuenta en Supabase (la que usaste para configurar la autenticación), simplemente inicia sesión. Si no, puedes registrarte allí mismo.
+2.  **Subida de Productos:** Una vez que hayas iniciado sesión, verás un formulario para "Subir Nuevo Producto":
+    *   **Nombre del Producto:** Nombre principal.
+    *   **Descripción:** Detalles del producto.
+    *   **Precio:** Precio de venta.
+    *   **Stock:** Cantidad disponible.
+    *   **Descuento:** Porcentaje de descuento (si aplica, por ejemplo, 10 para 10%).
+    *   **Categoría:** Para organizar tus productos (ej. "Ropa", "Accesorios").
+    *   **Imagen:** Puedes seleccionar una imagen desde tu dispositivo. Esta se subirá a **Supabase Storage** en el bucket `product-images`.
+    *   Al hacer clic en "Añadir Producto", la información se guardará en tu tabla `public.productos` y la imagen se asociará.
+3.  **Gestión de Productos Actuales:** Debajo del formulario de subida, verás una lista de tus productos actuales. Cada producto tiene una imagen, nombre, precio y stock.
+    *   **Eliminar Producto:** Al lado de cada producto, hay un botón de papelera (<i class="fas fa-trash"></i>) que te permite eliminar el producto de la base de datos y su imagen del almacenamiento.
+
+**Consideraciones de Seguridad (RLS):**
+
+*   Para que la subida de imágenes funcione, configuramos un bucket llamado `product-images` en Supabase Storage.
+*   También establecimos políticas de seguridad (RLS):
+    *   `Allow public read access`: Permite que cualquiera (incluida tu tienda) vea las imágenes.
+    *   `Allow authenticated upload`: Permite que cualquier usuario autenticado (como tú en el panel de admin) suba y elimine imágenes y productos. Esto significa que **cualquier usuario que se registre podrá subir/borrar productos**. Si deseas restringir esto a un usuario específico, deberíamos ajustar la política RLS para que solo tu ID de usuario (UID) tenga esos permisos.
+
+---
+**¡Felicitaciones!** Ahora tienes una tienda virtual completa con integración de base de datos dinámica y un panel de administración para gestionar tus productos.
+
