@@ -40,23 +40,31 @@ async function handleRegistration(e) {
     }
 
     if (authData.user) {
-        // Step 2: Insert the user details into the 'usuarios' public table
-        const { error: insertError } = await supabase
-            .from('usuarios')
-            .insert([
-                { 
-                    id: authData.user.id, // Use the same ID from auth.users
-                    nombre_completo: name,
-                    email: email
-                }
-            ]);
+        // Step 2: Insert details in public table. Supports either `usuarios` or `perfil_usuario` schema.
+        const userPayloads = [
+            { table: 'usuarios', data: { id: authData.user.id, nombre_completo: name, email: email } },
+            { table: 'perfil_usuario', data: { id_usuario: authData.user.id, nombre_completo: name } }
+        ];
 
-        if (insertError) {
-            // This is a tricky situation. The user is created in Auth but not in our public table.
-            // For now, we'll just show an error. A more robust solution might involve cleanup.
-            registerMessage.textContent = `Error al guardar datos: ${insertError.message}`;
+        let insertSuccess = false;
+        let lastInsertError = null;
+
+        for (const target of userPayloads) {
+            const { error: insertError } = await supabase
+                .from(target.table)
+                .insert([target.data]);
+
+            if (!insertError) {
+                insertSuccess = true;
+                break;
+            }
+            lastInsertError = insertError;
+        }
+
+        if (!insertSuccess) {
+            registerMessage.textContent = `Usuario creado en Auth, pero no se pudo guardar en tabla pública: ${lastInsertError?.message || 'Error desconocido'}`;
             registerMessage.style.color = 'red';
-            console.error('Error inserting into public.usuarios:', insertError);
+            console.error('Error inserting public user profile:', lastInsertError);
             return;
         }
 
