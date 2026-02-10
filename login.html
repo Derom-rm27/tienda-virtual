@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMELI'S - Iniciar Sesión</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="admin-page">
+    <header>
+        <div class="logo" onclick="window.location.href='index.html'" style="cursor: pointer;">AMELI<span>'</span>S</div>
+    </header>
+
+    <div class="main-layout">
+        <div class="admin-container">
+            <h3>Iniciar Sesión</h3>
+            <form id="loginForm">
+                <input type="email" id="loginEmail" placeholder="Correo Electrónico" required>
+                <input type="password" id="loginPassword" placeholder="Contraseña" required>
+                <button type="submit">Entrar</button>
+                <p id="loginMessage" style="margin-top:10px;"></p>
+            </form>
+            <p style="text-align: center; margin-top: 20px;">
+                ¿No tienes cuenta? <a href="registro.html">Regístrate aquí</a>
+            </p>
+            <p style="text-align: center; margin-top: 8px;">
+                ¿Eres administrador? <a href="admin.html">Ir al panel admin</a>
+            </p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="login.js"></script>
+</body>
+</html>

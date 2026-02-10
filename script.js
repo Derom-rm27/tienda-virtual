@@ -111,12 +111,13 @@ window.logoutUser = async function() {
     if (error) console.error('Error al cerrar sesión:', error.message);
 }
 
+window.goToLoginPage = function() {
+    window.location.href = 'login.html';
+}
+
 window.openAuthModal = function() {
-    alert('Prueba de diagnóstico: El botón está respondiendo.'); // Diagnostic alert
     if (authModal) {
         authModal.style.display = 'flex';
-    } else {
-        alert('Error: El modal de autenticación no se encontró en la página.');
     }
     if (authModalMessage) authModalMessage.textContent = '';
     if (authModalForm) authModalForm.reset();
