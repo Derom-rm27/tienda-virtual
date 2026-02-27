@@ -1,8 +1,8 @@
 name: Backup Database
 on:
   schedule:
-    - cron: '0 0 * * *' # Se ejecuta diariamente a medianoche
-  workflow_dispatch:     # Permite ejecutarlo manualmente cuando quieras
+    - cron: '0 0 * * *'
+  workflow_dispatch:
 
 jobs:
   backup:
@@ -12,7 +12,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-
 
       - name: Install PostgreSQL Client
         run: |
@@ -26,17 +25,24 @@ jobs:
         env:
           DB_URL: ${{ secrets.DB_URL }}
         run: |
-          # Usamos la ruta absoluta hacia el binario de la versión 17
+          # Crear la carpeta de destino si no existe
+          mkdir -p backup
+          
           PG_DUMP_PATH="/usr/lib/postgresql/17/bin/pg_dump"
           
-          $PG_DUMP_PATH "$DB_URL" --schema-only --section=pre-data --schema=public --no-privileges --no-owner > tablas_puras.sql
-          $PG_DUMP_PATH "$DB_URL" --data-only --schema=public --column-inserts --no-privileges --no-owner > datos.sql
-          $PG_DUMP_PATH "$DB_URL" --schema-only --section=post-data --schema=public --no-privileges --no-owner > constraints.sql
+          # Guardar los archivos directamente en la carpeta 'backup/'
+          $PG_DUMP_PATH "$DB_URL" --schema-only --section=pre-data --schema=public --no-privileges --no-owner > backup/tablas_puras.sql
+          $PG_DUMP_PATH "$DB_URL" --data-only --schema=public --column-inserts --no-privileges --no-owner > backup/datos.sql
+          $PG_DUMP_PATH "$DB_URL" --schema-only --section=post-data --schema=public --no-privileges --no-owner > backup/constraints.sql
           
       - name: Push to Repository
         run: |
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
-          git add *.sql
-          # Solo hace commit y push si hubo cambios en los archivos
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Backup automático: $(date)" && git push)
+          
+          # Asegurar que Git tome en cuenta los archivos dentro de la carpeta backup
+          git add backup/*.sql
+          
+          # Commit y push (reemplazará los archivos anteriores si existen)
+          git commit -m "Backup automático en carpeta: $(date)" || echo "No hay cambios para subir"
+          git push
