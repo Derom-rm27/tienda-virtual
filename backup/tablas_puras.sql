@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict ze27mSEzymJPOZk9lZUayBwuff7y2qp1eX34a09EleMtuH6NQjS1P7yPJFVkc4m
+\restrict iNpN0DLz0V2h7Wyl55XxMhYksO5zpY9iteYldzZTSUFsEvBwNM7h70Uvqm5wsuB
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.9 (Ubuntu 17.9-1.pgdg24.04+1)
@@ -124,5 +124,5 @@ CREATE TABLE public.usuarios (
 -- PostgreSQL database dump complete
 --
 
-\unrestrict ze27mSEzymJPOZk9lZUayBwuff7y2qp1eX34a09EleMtuH6NQjS1P7yPJFVkc4m
+\unrestrict iNpN0DLz0V2h7Wyl55XxMhYksO5zpY9iteYldzZTSUFsEvBwNM7h70Uvqm5wsuB
 

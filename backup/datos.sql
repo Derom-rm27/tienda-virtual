@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict oWWN5lkcCKIcX4vPbuZlm7g5HWri17KJ20CSHfXhwDKX6TAumMmmy5IgkxWs3BD
+\restrict 7G9slBts5J2l3tbV6i1UmsQfZd43ILjJyFxPPo8YQ6GdphfX3izEdsWNrtdYgKK
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.9 (Ubuntu 17.9-1.pgdg24.04+1)
@@ -60,5 +60,5 @@ SELECT pg_catalog.setval('public.administradores_id_seq', 1, true);
 -- PostgreSQL database dump complete
 --
 
-\unrestrict oWWN5lkcCKIcX4vPbuZlm7g5HWri17KJ20CSHfXhwDKX6TAumMmmy5IgkxWs3BD
+\unrestrict 7G9slBts5J2l3tbV6i1UmsQfZd43ILjJyFxPPo8YQ6GdphfX3izEdsWNrtdYgKK
 
