@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict YMDHDdwYCHl8P9KCTGFa7EFqmm95XfAl991b54cZCDwcXpewXr7kj8OZ0qubCQR
+\restrict 1XL4gedQY5F1doJ9z3lB6XxAWr0n7zYyJWqDlFhgsOpuuQrAykZK8NK3hPwy1Qu
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.9 (Ubuntu 17.9-1.pgdg24.04+1)
@@ -73,5 +73,5 @@ ALTER TABLE ONLY public.usuarios
 -- PostgreSQL database dump complete
 --
 
-\unrestrict YMDHDdwYCHl8P9KCTGFa7EFqmm95XfAl991b54cZCDwcXpewXr7kj8OZ0qubCQR
+\unrestrict 1XL4gedQY5F1doJ9z3lB6XxAWr0n7zYyJWqDlFhgsOpuuQrAykZK8NK3hPwy1Qu
 
